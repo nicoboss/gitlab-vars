@@ -2,10 +2,12 @@ package cli
 
 import (
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/erminson/gitlab-vars/internal/usecase"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 var exportCmd = &cobra.Command{
@@ -18,11 +20,19 @@ var exportCmd = &cobra.Command{
 
 		vars, err := uc.ListVariables()
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 
 		fmt.Println(vars)
+		f, errCreate := os.Create(Filename)
+		if errCreate != nil {
+			log.Fatal(errCreate)
+		}
+		defer f.Close()
+		_, errWrite := f.WriteString(vars)
+		if errWrite != nil {
+			log.Fatal(errWrite)
+		}
 	},
 }
 
