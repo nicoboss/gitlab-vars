@@ -3,27 +3,33 @@ package usecase
 import (
 	"encoding/json"
 	"fmt"
-	glvarsapi "github.com/erminson/gitlab-vars/internal/client"
-	"github.com/erminson/gitlab-vars/internal/types"
 	"io"
 	"os"
 	"sync"
+
+	glvarsapi "github.com/erminson/gitlab-vars/internal/client"
+	"github.com/erminson/gitlab-vars/internal/types"
 )
 
 type UseCase struct {
+	category  string
 	projectId int64
 	client    *glvarsapi.VarsAPI
 }
 
-func NewUseCase(projectId int64, client *glvarsapi.VarsAPI) *UseCase {
+func NewUseCase(category string, projectId int64, client *glvarsapi.VarsAPI) *UseCase {
 	return &UseCase{
+		category:  category,
 		projectId: projectId,
 		client:    client,
 	}
 }
 
 func (u *UseCase) SaveVariablesToFile(path string) error {
-	params := types.Params{ProjectId: u.projectId}
+	params := types.Params{
+		Category:  u.category,
+		ProjectId: u.projectId,
+	}
 	vars, err := u.client.GetVariables(params)
 
 	cwd, _ := os.Getwd()
@@ -46,7 +52,10 @@ func (u *UseCase) SaveVariablesToFile(path string) error {
 }
 
 func (u *UseCase) ListVariables() (string, error) {
-	params := types.Params{ProjectId: u.projectId}
+	params := types.Params{
+		Category:  u.category,
+		ProjectId: u.projectId,
+	}
 	vars, err := u.client.GetVariables(params)
 
 	if err != nil {
@@ -69,7 +78,10 @@ func (u *UseCase) ReWriteVariablesFromFile(filename string) error {
 
 	fmt.Println(newVars)
 
-	params := types.Params{ProjectId: u.projectId}
+	params := types.Params{
+		Category:  u.category,
+		ProjectId: u.projectId,
+	}
 	oldVars, err := u.client.GetVariables(params)
 	if err != nil {
 		return fmt.Errorf("getting error. %v. error: %v", params.String(), err)
@@ -81,6 +93,7 @@ func (u *UseCase) ReWriteVariablesFromFile(filename string) error {
 		go func(v types.Variable) {
 			defer wg.Done()
 			params := types.Params{
+				Category:  u.category,
 				ProjectId: u.projectId,
 				Key:       v.Key,
 			}
@@ -99,6 +112,7 @@ func (u *UseCase) ReWriteVariablesFromFile(filename string) error {
 		go func(v types.Variable) {
 			defer wg.Done()
 			params := types.Params{
+				Category:  u.category,
 				ProjectId: u.projectId,
 			}
 
@@ -124,7 +138,10 @@ func (u *UseCase) ImportVariablesFromFile(filename string) error {
 		return err
 	}
 
-	params := types.Params{ProjectId: u.projectId}
+	params := types.Params{
+		Category:  u.category,
+		ProjectId: u.projectId,
+	}
 	exportedVars, err := u.client.GetVariables(params)
 	if err != nil {
 		return err
@@ -142,6 +159,7 @@ func (u *UseCase) ImportVariablesFromFile(filename string) error {
 
 	_ = repeatTasks("Update", updateVars, func(v types.Variable) error {
 		params = types.Params{
+			Category:  u.category,
 			ProjectId: u.projectId,
 			Key:       v.Key,
 		}
@@ -159,6 +177,7 @@ func (u *UseCase) ImportVariablesFromFile(filename string) error {
 
 	_ = repeatTasks("Create", createVars, func(v types.Variable) error {
 		params = types.Params{
+			Category:  u.category,
 			ProjectId: u.projectId,
 			Key:       v.Key,
 		}
@@ -180,12 +199,16 @@ func (u *UseCase) AddVariable(newVar types.Variable) (types.Variable, error) {
 		return types.Variable{}, err
 	}
 
-	params := types.Params{ProjectId: u.projectId}
+	params := types.Params{
+		Category:  u.category,
+		ProjectId: u.projectId,
+	}
 	return u.client.CreateVariable(params, newVar)
 }
 
 func (u *UseCase) DeleteVariable(key, envScope string) error {
 	params := types.Params{
+		Category:  u.category,
 		ProjectId: u.projectId,
 		Key:       key,
 	}

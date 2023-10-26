@@ -3,13 +3,14 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+	"strings"
+
 	"github.com/erminson/gitlab-vars/internal/types"
 	"github.com/erminson/gitlab-vars/internal/usecase"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io"
-	"os"
-	"strings"
 )
 
 // nolint
@@ -37,7 +38,7 @@ var addCmd = &cobra.Command{
 			}
 
 			projectId := viper.GetInt64("project-id")
-			uc := usecase.NewUseCase(projectId, client)
+			uc := usecase.NewUseCase(Category, projectId, client)
 
 			addedVar, err := uc.AddVariable(newVar)
 			if err != nil {

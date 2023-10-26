@@ -2,10 +2,11 @@ package cli
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/erminson/gitlab-vars/internal/usecase"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 var importCmd = &cobra.Command{
@@ -14,7 +15,7 @@ var importCmd = &cobra.Command{
 	Long:  `Import list of variables (JSON)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		projectId := viper.GetInt64("project-id")
-		uc := usecase.NewUseCase(projectId, client)
+		uc := usecase.NewUseCase(Category, projectId, client)
 
 		err := uc.ImportVariablesFromFile(Filename)
 		if err != nil {

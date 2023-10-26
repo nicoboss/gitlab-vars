@@ -2,10 +2,11 @@ package cli
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/erminson/gitlab-vars/internal/usecase"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 // nolint
@@ -22,7 +23,7 @@ var deleteCmd = &cobra.Command{
 			envScope = args[1]
 		}
 		projectId := viper.GetInt64("project-id")
-		uc := usecase.NewUseCase(projectId, client)
+		uc := usecase.NewUseCase(Category, projectId, client)
 		err := uc.DeleteVariable(key, envScope)
 		if err != nil {
 			fmt.Println(fmt.Errorf("error: %v", err))

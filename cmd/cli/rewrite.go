@@ -2,11 +2,12 @@ package cli
 
 import (
 	"fmt"
+	"os"
+
 	glvarsapi "github.com/erminson/gitlab-vars/internal/client"
 	"github.com/erminson/gitlab-vars/internal/usecase"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
 )
 
 // nolint
@@ -23,7 +24,7 @@ var rewriteCmd = &cobra.Command{
 		}
 
 		projectId := viper.GetInt64("project-id")
-		uc := usecase.NewUseCase(projectId, client)
+		uc := usecase.NewUseCase(Category, projectId, client)
 
 		err = uc.ReWriteVariablesFromFile(Filename)
 		if err != nil {

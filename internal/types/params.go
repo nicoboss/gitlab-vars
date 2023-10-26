@@ -11,6 +11,7 @@ var (
 )
 
 type Params struct {
+	Category  string
 	ProjectId int64
 	Key       string
 }

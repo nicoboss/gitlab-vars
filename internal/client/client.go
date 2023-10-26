@@ -4,17 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/erminson/gitlab-vars/internal/types"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/erminson/gitlab-vars/internal/types"
 )
 
 const APIHost = "https://gitlab.com"
 const APIEndpoint = "/api/v4/%s"
-const APIEndpointVars = "projects/%d/variables/%s"
+const APIEndpointVars = "%s/%d/variables/%s"
 const APIEndpointPersonalTokens = "personal_access_tokens/self"
 
 const timeout = time.Second * 3
@@ -179,7 +180,7 @@ func (v *VarsAPI) GetVariables(params types.Params) ([]types.Variable, error) {
 		return nil, err
 	}
 
-	endpoint := fmt.Sprintf(APIEndpointVars+"?per_page=100", params.ProjectId, params.Key)
+	endpoint := fmt.Sprintf(APIEndpointVars+"?per_page=100", params.Category, params.ProjectId, params.Key)
 	resp, err := v.MakeRequestWithContext(ctx, "GET", endpoint, types.Filter{}, types.VarData{})
 	if err != nil {
 		return nil, err
@@ -203,7 +204,7 @@ func (v *VarsAPI) GetVariable(params types.Params, filter types.Filter) (types.V
 	if err != nil {
 		return types.Variable{}, err
 	}
-	endpoint := fmt.Sprintf(APIEndpointVars, params.ProjectId, params.Key)
+	endpoint := fmt.Sprintf(APIEndpointVars, params.Category, params.ProjectId, params.Key)
 	resp, err := v.MakeRequestWithContext(ctx, "GET", endpoint, filter, types.VarData{})
 	if err != nil {
 		return types.Variable{}, nil
@@ -233,7 +234,7 @@ func (v *VarsAPI) CreateVariableFromVarData(params types.Params, data types.VarD
 		return types.Variable{}, err
 	}
 
-	endpoint := fmt.Sprintf(APIEndpointVars, params.ProjectId, "")
+	endpoint := fmt.Sprintf(APIEndpointVars, params.Category, params.ProjectId, "")
 	resp, err := v.MakeRequestWithContext(ctx, "POST", endpoint, types.Filter{}, data)
 	if err != nil {
 		return types.Variable{}, err
@@ -267,7 +268,7 @@ func (v *VarsAPI) UpdateVariableFromVarData(params types.Params, data types.VarD
 		return types.Variable{}, err
 	}
 
-	endpoint := fmt.Sprintf(APIEndpointVars, params.ProjectId, params.Key)
+	endpoint := fmt.Sprintf(APIEndpointVars, params.Category, params.ProjectId, params.Key)
 	resp, err := v.MakeRequestWithContext(ctx, "PUT", endpoint, filter, data)
 	if err != nil {
 		return types.Variable{}, err
@@ -296,7 +297,7 @@ func (v *VarsAPI) DeleteVariable(params types.Params, filter types.Filter) error
 		return err
 	}
 
-	endpoint := fmt.Sprintf(APIEndpointVars, params.ProjectId, params.Key)
+	endpoint := fmt.Sprintf(APIEndpointVars, params.Category, params.ProjectId, params.Key)
 	_, err = v.MakeRequestWithContext(ctx, "DELETE", endpoint, filter, types.VarData{})
 
 	return err

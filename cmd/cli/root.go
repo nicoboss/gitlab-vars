@@ -2,11 +2,12 @@ package cli
 
 import (
 	"fmt"
+	"os"
+	"strings"
+
 	glvarsapi "github.com/erminson/gitlab-vars/internal/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"strings"
 )
 
 var version = "0.1.0"
@@ -14,6 +15,7 @@ var version = "0.1.0"
 var client *glvarsapi.VarsAPI
 
 var (
+	Category  string
 	ProjectId int64
 	Filename  string
 	cfgFile   string
@@ -61,13 +63,14 @@ func init() {
 	cobra.OnInitialize(initConfig, initClient)
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
-	rootCmd.PersistentFlags().Int64P("project", "p", 0, "project id")
+	rootCmd.PersistentFlags().Int64P("project", "p", 0, "project or group id")
 	err := viper.BindPFlag("project-id", rootCmd.PersistentFlags().Lookup("project"))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
+	rootCmd.PersistentFlags().StringVar(&Category, "category", "projects", "projects or groups")
 	rootCmd.PersistentFlags().StringVarP(&Filename, "filename", "f", "", "path to file with variables")
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.glvars.yaml)")
 }
