@@ -151,7 +151,7 @@ func (u *UseCase) ImportVariablesFromFile(filename string) error {
 	var createVars []types.Variable
 	for _, v := range newVars {
 		if containsVariableInSlice(v, exportedVars) {
-			updateVars = append(updateVars, v)
+			//updateVars = append(updateVars, v)
 		} else {
 			createVars = append(createVars, v)
 		}
