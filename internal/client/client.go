@@ -68,6 +68,8 @@ func (v *VarsAPI) MakeRequestWithContext(ctx context.Context, method string, end
 
 	values := buildBody(varData)
 
+	fmt.Println("URL:", uri)
+
 	req, err := http.NewRequestWithContext(ctx, method, uri, strings.NewReader(values.Encode()))
 	if err != nil {
 		return nil, err
@@ -91,6 +93,12 @@ func (v *VarsAPI) MakeRequestWithContext(ctx context.Context, method string, end
 	if err != nil {
 		return nil, err
 	}
+
+	responseBody, err := json.Marshal(apiResp.Result)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("Response:", string(responseBody))
 
 	if resp.StatusCode >= 400 && resp.StatusCode <= 499 {
 		var apiErr types.APIError
